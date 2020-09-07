@@ -1,0 +1,5 @@
+# Configuration file
+# key = value
+quarkus.http.port=8081
+tomon.token=
+tomon.websocket.url=wss://gateway.tomon.co
