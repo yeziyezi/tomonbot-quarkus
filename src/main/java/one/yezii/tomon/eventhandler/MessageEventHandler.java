@@ -1,7 +1,7 @@
 package one.yezii.tomon.eventhandler;
 
 import one.yezii.tomon.DispatchMessageHandler;
-import one.yezii.tomon.TomonWsMessage;
+import one.yezii.tomon.WsMessage;
 import one.yezii.tomon.WsSessionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,19 +26,16 @@ public class MessageEventHandler implements EventHandler {
         if (context.getMessage().isEmpty()) {
             return;
         }
-        TomonWsMessage tm = context.getMessage().get();
+        WsMessage tm = context.getMessage().get();
         String d = Optional.ofNullable(tm.d).map(Objects::toString).orElse("");
         switch (tm.opEnum) {
             case HELLO:
                 logger.info("hello message:" + d);
                 int heartbeatInterval = tm.d.get("heartbeat_interval").asInt();
                 startHeartbeatSendTask(heartbeatInterval / 2, context);
-                startNewHeartbeatAckWaitingTimer();
                 break;
             case HEARTBEAT_ACK:
                 logger.debug("received heartbeat ack");
-                stopHeartbeatAckWaitingTimer();
-                startNewHeartbeatAckWaitingTimer();
                 break;
             case DISPATCH:
                 logger.info("received dispatch:" + tm.toString());
@@ -61,7 +58,7 @@ public class MessageEventHandler implements EventHandler {
         scheduledExecutor.scheduleAtFixedRate(
                 () -> {
                     logger.debug("send heartbeat");
-                    context.send(TomonWsMessage.heartbeat().toString());
+                    context.sendMessage(WsMessage.heartbeat());
                 },
                 heartbeatInterval, heartbeatInterval, TimeUnit.MILLISECONDS);
     }

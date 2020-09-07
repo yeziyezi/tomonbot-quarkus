@@ -2,7 +2,7 @@ package one.yezii.tomon;
 
 import java.util.Arrays;
 
-public enum TomonWsOpcode {
+public enum WsOpcode {
     DISPATCH(0),            //接收	业务事件的分发
     HEARTBEAT(1),           //发送、接收	心跳包发起，即 ping
     IDENTIFY(2),            //发送、接收	鉴权，socket 建立后确定用户身份
@@ -11,12 +11,12 @@ public enum TomonWsOpcode {
     VOICE_STATE_UPDATE(5);  //发送、接收	语音服务信令
     public int id;
 
-    TomonWsOpcode(int id) {
+    WsOpcode(int id) {
         this.id = id;
     }
 
-    public static TomonWsOpcode ofId(int id) {
-        return Arrays.stream(TomonWsOpcode.values())
+    public static WsOpcode ofId(int id) {
+        return Arrays.stream(WsOpcode.values())
                 .filter(e -> e.id == id)
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("error SocketOpcode id"));
