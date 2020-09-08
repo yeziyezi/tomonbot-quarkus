@@ -1,4 +1,4 @@
-package one.yezii.tomon;
+package one.yezii.tomon.push;
 
 import java.io.IOException;
 import java.net.URI;

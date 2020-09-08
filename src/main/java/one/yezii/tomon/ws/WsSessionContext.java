@@ -1,4 +1,4 @@
-package one.yezii.tomon;
+package one.yezii.tomon.ws;
 
 import javax.websocket.Session;
 import java.util.Optional;

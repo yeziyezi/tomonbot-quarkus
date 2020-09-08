@@ -1,6 +1,6 @@
 package one.yezii.tomon.eventhandler;
 
-import one.yezii.tomon.WsSessionContext;
+import one.yezii.tomon.ws.WsSessionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

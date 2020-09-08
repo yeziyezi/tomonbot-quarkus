@@ -1,4 +1,4 @@
-package one.yezii.tomon;
+package one.yezii.tomon.common;
 
 import java.util.Arrays;
 

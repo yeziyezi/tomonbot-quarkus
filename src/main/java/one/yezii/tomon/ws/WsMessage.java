@@ -1,4 +1,4 @@
-package one.yezii.tomon;
+package one.yezii.tomon.ws;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;

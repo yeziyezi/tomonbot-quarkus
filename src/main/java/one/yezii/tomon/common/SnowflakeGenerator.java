@@ -1,4 +1,4 @@
-package one.yezii.tomon;
+package one.yezii.tomon.common;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -28,5 +28,9 @@ public class SnowflakeGenerator {
         }
         lastTimestampId = timestampId;
         return Long.parseLong(first + timestampId + endpointId + serialId, 2);
+    }
+
+    public static String nextString() {
+        return String.valueOf(next());
     }
 }

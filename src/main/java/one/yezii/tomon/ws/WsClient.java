@@ -1,7 +1,8 @@
-package one.yezii.tomon;
+package one.yezii.tomon.ws;
 
 import io.quarkus.runtime.Startup;
 import one.yezii.tomon.eventhandler.*;
+import one.yezii.tomon.push.HttpUtil;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.websocket.*;
