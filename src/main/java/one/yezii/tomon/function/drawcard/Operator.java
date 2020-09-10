@@ -5,6 +5,9 @@ public class Operator {
     private int star;//星数
     private int upRate;//up后概率，如果没up则为0
 
+    private Operator() {
+    }
+
     public static Operator of(String name, int star, int upRate) {
         Operator operator = new Operator();
         operator.name = name;

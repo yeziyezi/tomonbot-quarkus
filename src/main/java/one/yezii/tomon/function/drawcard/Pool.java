@@ -9,33 +9,29 @@ public class Pool {
     private final Map<Integer, Set<Operator>> upMap = new HashMap<>();
     //星级&非干员集合map
     private final Map<Integer, Set<Operator>> commonMap = new HashMap<>();
-    //卡池基础概率 key星级 value 概率
-    private PoolBaseRate poolBaseRate;
+    //将星级的概率逐级叠加作为roll出当前星级的点数上界
+    //key 星级 value roll(sum)当值小于value时抽中该星级
+    private LinkedHashMap<Integer, Integer> rollStarMap;
+    //各星级up干员所占概率之和
+    private Map<Integer, Integer> upRateSumOfStar;
 
     private Pool() {
     }
 
     public static Pool newPool(PoolBaseRate poolBaseRate) {
         Pool pool = new Pool();
-        pool.poolBaseRate = poolBaseRate;
-        return pool;
-    }
-
-    public static void main(String[] args) {
-        Pool pool = Pool.newPool(PoolBaseRate.newInstance()
-                .setRate(3, 40)
-                .setRate(4, 50)
-                .setRate(5, 8)
-                .setRate(6, 2)
-        );
-        System.out.println("体验一下没有保底机制的10连抽吧");
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
-                pool.draw();
-                System.out.print("\t");
-            }
-            System.out.println();
+        //初始化roll星级使用的map
+        AtomicInteger sum = new AtomicInteger();
+        pool.rollStarMap = poolBaseRate.getMap().entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        entry -> sum.addAndGet(entry.getValue()),
+                        (v1, v2) -> v2,
+                        LinkedHashMap::new));
+        if (sum.get() != 100) {
+            throw new RuntimeException("各星级概率之和不为100");
         }
+        return pool;
     }
 
     public void addOperator(Operator operator) {
@@ -44,24 +40,35 @@ public class Pool {
         (operator.getUpRate() == 0 ? commonMap : upMap).get(operator.getStar()).add(operator);
     }
 
+    //结束干员添加开始初始化一些常用数据
+    public void finish() {
+        upRateSumOfStar = upMap.entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        entry -> entry.getValue()
+                                .stream()
+                                .mapToInt(Operator::getUpRate)
+                                .sum()));
+    }
+
     public Operator draw() {
-        AtomicInteger sum = new AtomicInteger();
-        //将星级的概率逐级叠加作为roll出当前星级的点数上界
-        //key 星级 value roll(sum)当值小于value时抽中该星级
-        Map<Integer, Integer> rollStarMap = poolBaseRate.getMap().entrySet()
+        int star = rollStar();
+        boolean isUp = rollUpOrNot(star);
+        return Operator.of(star + (isUp ? "_up" : ""), star, 0);
+    }
+
+    private boolean rollUpOrNot(int star) {
+        return Dice.roll(100) < upRateSumOfStar.get(star);
+    }
+
+    private int rollStar() {
+        int roll = Dice.roll(100);
+        return rollStarMap.entrySet()
                 .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> sum.addAndGet(entry.getValue())));
-        int roll1 = Dice.roll(sum.get());
-        int star = rollStarMap.entrySet()
-                .stream()
-                .sorted(Comparator.comparingInt(Map.Entry::getValue))
-                .filter(entry -> entry.getValue() > roll1)
+                .filter(entry -> roll < entry.getValue())
                 .findFirst()
                 .map(Map.Entry::getKey)
                 .orElseThrow();
-        System.out.print(star);
-        //todo
-        return null;
     }
 
 }
