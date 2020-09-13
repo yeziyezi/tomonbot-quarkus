@@ -8,7 +8,13 @@ public class Operator {
     private Operator() {
     }
 
-    public static Operator of(String name, int star, int upRate) {
+    /**
+     * @param name   干员名称
+     * @param star   星数
+     * @param upRate up后在同星级中所占的概率，如果非up则null
+     * @return Operator
+     */
+    public static Operator of(String name, int star, Integer upRate) {
         Operator operator = new Operator();
         operator.name = name;
         operator.star = star;
@@ -24,7 +30,11 @@ public class Operator {
         return star;
     }
 
-    public int getUpRate() {
+    public Integer getUpRate() {
         return upRate;
+    }
+
+    public void setUpRate(Integer upRate) {
+        this.upRate = upRate;
     }
 }
