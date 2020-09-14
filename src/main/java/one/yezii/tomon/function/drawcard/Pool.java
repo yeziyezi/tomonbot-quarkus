@@ -14,12 +14,14 @@ public class Pool {
     private final Map<Integer, Set<Operator>> upMap = new HashMap<>();
     //星级&非干员集合map
     private final Map<Integer, Set<Operator>> commonMap = new HashMap<>();
-    private PoolBaseRate poolBaseRate;
+    private final PoolStarRate poolCurrentRate = PoolStarRate.newInstance();
+    private PoolStarRate poolBaseRate;
+    private int drawTimesWithoutSix = 0;
 
     private Pool() {
     }
 
-    public static Pool newPool(PoolBaseRate poolBaseRate) {
+    public static Pool newPool(PoolStarRate poolBaseRate) {
         Pool pool = new Pool();
         pool.poolBaseRate = poolBaseRate;
         return pool;
@@ -28,20 +30,57 @@ public class Pool {
     public void addOperator(Operator operator) {
         upMap.putIfAbsent(operator.getStar(), new HashSet<>());
         commonMap.putIfAbsent(operator.getStar(), new HashSet<>());
-        (operator.getUpRate() == null ? commonMap : upMap).get(operator.getStar()).add(operator);
+        (operator.getUpRate() == 0.0 ? commonMap : upMap).get(operator.getStar()).add(operator);
     }
 
     public Operator draw() {
+        if (drawTimesWithoutSix == 0) {
+            initPoolCurrentStarRate();
+        }
+        //超过50抽，保底机制开始生效
+        if (drawTimesWithoutSix >= 50) {
+            improveSixStarRate(0.02);
+        }
+        drawTimesWithoutSix++;
         int star = RollHelper.roll(poolBaseRate.getMap());
-        boolean isUp = rollUpOrNot(star);
+        if (star == 6) {
+            initPoolCurrentStarRate();
+        }
+        boolean isUp = rollIsUp(star);
         if (isUp) {
             return rollOperatorFromUpPool(star);
         }
         return rollOperatorFromCommonPool(star);
     }
 
+    private void initPoolCurrentStarRate() {
+        poolCurrentRate.getMap().putAll(poolBaseRate.getMap());
+    }
+
+    private void improveSixStarRate(double improvement) {
+        //将六星的概率提高指定值
+        double sixStarRate = poolCurrentRate.getRate(6) + improvement;
+        poolCurrentRate.setRate(6, sixStarRate);
+
+        //将六星概率提升后，将剩余概率按比例分给剩下的星级
+        //根据现有概率之和和原有概率之和计算出其他星级概率的缩小比率，按此比率缩小其他星级的概率
+        double restStarCurrentRateSum = poolCurrentRate.getMap().values().stream().mapToDouble(v -> v).sum();
+        double restStarNewRateSum = 1 - sixStarRate;
+        double reductionRatio = restStarNewRateSum / restStarCurrentRateSum;
+        Map<Integer, Double> newStarRateMap = poolCurrentRate.getMap()
+                .entrySet()
+                .stream()
+                .filter(entry -> entry.getKey() != 6)//过滤掉六星不进行处理
+                .peek(entry -> entry.setValue(entry.getValue() * reductionRatio))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        poolCurrentRate.getMap().putAll(newStarRateMap);
+        System.out.println("current star rate:" + poolCurrentRate.getMap());
+        System.out.println("current star rate sum:" + poolCurrentRate.getMap().values().stream()
+                .mapToDouble(v -> v).sum());
+    }
+
     private Operator rollOperatorFromCommonPool(int star) {
-        Map<Operator, Integer> rateMap = commonMap.get(star)
+        Map<Operator, Double> rateMap = commonMap.get(star)
                 .stream()
                 .peek(operator -> operator.setUpRate(1))
                 .collect(Collectors.toMap(operator -> operator, Operator::getUpRate));
@@ -49,14 +88,14 @@ public class Pool {
     }
 
     private Operator rollOperatorFromUpPool(int star) {
-        Map<Operator, Integer> rateMap = upMap.get(star)
+        Map<Operator, Double> rateMap = upMap.get(star)
                 .stream()
                 .collect(Collectors.toMap(operator -> operator, Operator::getUpRate));
         return RollHelper.roll(rateMap);
     }
 
-    private boolean rollUpOrNot(int star) {
-        int hitNum = upMap.get(star).stream().mapToInt(Operator::getUpRate).sum();
+    private boolean rollIsUp(int star) {
+        double hitNum = upMap.get(star).stream().mapToDouble(Operator::getUpRate).sum();
         return RollHelper.hit(hitNum, 100);
     }
 

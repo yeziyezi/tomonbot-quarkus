@@ -1,8 +1,9 @@
 package one.yezii.tomon.function.drawcard;
 
+import com.google.common.util.concurrent.AtomicDouble;
+
 import java.util.Comparator;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class RollHelper {
@@ -13,13 +14,13 @@ public class RollHelper {
      * @param <T> key的泛型
      * @return roll出的结果
      */
-    public static <T> T roll(Map<T, Integer> map) {
-        AtomicInteger sum = new AtomicInteger();
-        Map<T, Integer> rollMap = map.entrySet().stream()
+    public static <T> T roll(Map<T, Double> map) {
+        AtomicDouble sum = new AtomicDouble();
+        Map<T, Double> rollMap = map.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> sum.addAndGet(entry.getValue())));
-        int point = Dice.roll(sum.get());
+        double point = Dice.rollDouble(sum.get());
         return rollMap.entrySet().stream()
-                .sorted(Comparator.comparingInt(Map.Entry::getValue))
+                .sorted(Comparator.comparingDouble(Map.Entry::getValue))
                 .filter(entry -> entry.getValue() > point)
                 .findFirst()
                 .orElseThrow()
@@ -27,11 +28,11 @@ public class RollHelper {
     }
 
     /**
-     * 给定全部事件数量和命中事件所占的数量，计算是否命中
+     * 给定总概率和命中概率，计算是否命中
      *
      * @return 是否命中
      */
-    public static boolean hit(int hitNum, int totalNum) {
-        return Dice.roll(totalNum) < hitNum;
+    public static boolean hit(double hitNum, double totalNum) {
+        return Dice.rollDouble(totalNum) < hitNum;
     }
 }

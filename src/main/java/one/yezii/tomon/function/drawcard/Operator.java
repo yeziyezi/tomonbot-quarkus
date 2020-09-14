@@ -1,9 +1,9 @@
 package one.yezii.tomon.function.drawcard;
 
 public class Operator {
-    private String name;//干员名字
+    private String name = "";//干员名字
     private int star;//星数
-    private int upRate;//up后概率，如果没up则为0
+    private double upRate = 0;//up后概率，如果没up则为0
 
     private Operator() {
     }
@@ -30,7 +30,7 @@ public class Operator {
         return star;
     }
 
-    public Integer getUpRate() {
+    public double getUpRate() {
         return upRate;
     }
 
