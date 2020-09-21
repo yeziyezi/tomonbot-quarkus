@@ -17,6 +17,9 @@ public class Pool {
     private final PoolStarRate poolCurrentRate = PoolStarRate.newInstance();
     private PoolStarRate poolBaseRate;
     private int drawTimesWithoutSix = 0;
+    private String openTime;
+    private PoolDescriptor poolDescriptor;
+    private String name;
 
     private Pool() {
     }
@@ -39,7 +42,7 @@ public class Pool {
         }
         //超过50抽，保底机制开始生效
         if (drawTimesWithoutSix >= 50) {
-            improveSixStarRate(0.02);
+            improveSixStarRate();
         }
         drawTimesWithoutSix++;
         int star = RollHelper.roll(poolBaseRate.getMap());
@@ -57,9 +60,9 @@ public class Pool {
         poolCurrentRate.getMap().putAll(poolBaseRate.getMap());
     }
 
-    private void improveSixStarRate(double improvement) {
-        //将六星的概率提高指定值
-        double sixStarRate = poolCurrentRate.getRate(6) + improvement;
+    private void improveSixStarRate() {
+        //将六星的概率提高2%
+        double sixStarRate = poolCurrentRate.getRate(6) + 0.02;
         poolCurrentRate.setRate(6, sixStarRate);
 
         //将六星概率提升后，将剩余概率按比例分给剩下的星级
@@ -99,4 +102,27 @@ public class Pool {
         return RollHelper.hit(hitNum, 100);
     }
 
+    public String getOpenTime() {
+        return openTime;
+    }
+
+    public void setOpenTime(String openTime) {
+        this.openTime = openTime;
+    }
+
+    public PoolDescriptor getPoolDescriptor() {
+        return poolDescriptor;
+    }
+
+    public void setPoolDescriptor(PoolDescriptor poolDescriptor) {
+        this.poolDescriptor = poolDescriptor;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

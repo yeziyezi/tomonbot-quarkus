@@ -14,7 +14,7 @@ public class Operator {
      * @param upRate up后在同星级中所占的概率，如果非up则null
      * @return Operator
      */
-    public static Operator of(String name, int star, Integer upRate) {
+    public static Operator of(String name, int star, double upRate) {
         Operator operator = new Operator();
         operator.name = name;
         operator.star = star;
@@ -34,7 +34,7 @@ public class Operator {
         return upRate;
     }
 
-    public void setUpRate(Integer upRate) {
+    public void setUpRate(double upRate) {
         this.upRate = upRate;
     }
 }
