@@ -19,10 +19,6 @@ public class Spider {
             DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm", Locale.CHINA);
     private final static Logger logger = LoggerFactory.getLogger(Spider.class);
 
-    public static void main(String[] args) throws InterruptedException, IOException, URISyntaxException {
-        List<Pool> pools = new Spider().fetchPools();
-    }
-
     public List<Pool> fetchPools() {
         Optional<String[]> tbodyArr = fetchTBody();
         if (tbodyArr.isEmpty()) {

@@ -125,4 +125,8 @@ public class Pool {
     public void setName(String name) {
         this.name = name;
     }
+
+    public Map<Integer, Set<Operator>> getUpMap() {
+        return upMap;
+    }
 }
