@@ -18,6 +18,7 @@ public class WsClient {
     private final EventHandler errorEventHandler = new ErrorEventHandler();
     private final EventHandler closeEventHandler = new CloseEventHandler();
     private final WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+    private Session session;
 
     public WsClient(@ConfigProperty(name = "tomon.token") String token,
                     @ConfigProperty(name = "tomon.websocket.url") String url) {
@@ -29,10 +30,14 @@ public class WsClient {
 
     public void connectToServer() {
         try {
-            container.connectToServer(this, new URI(url));
+            session = container.connectToServer(this, new URI(url));
         } catch (Exception e) {
             throw new RuntimeException("connect failed", e);
         }
+    }
+
+    public boolean sessionActive() {
+        return session != null && session.isOpen();
     }
 
     @OnOpen

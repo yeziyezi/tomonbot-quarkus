@@ -4,6 +4,9 @@ import one.yezii.tomon.ws.WsSessionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.enterprise.context.ApplicationScoped;
+
+@ApplicationScoped
 public class CloseEventHandler implements EventHandler {
 
     private final Logger logger = LoggerFactory.getLogger(CloseEventHandler.class);
