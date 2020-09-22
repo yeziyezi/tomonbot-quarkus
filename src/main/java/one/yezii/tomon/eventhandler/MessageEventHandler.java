@@ -8,8 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -19,7 +17,6 @@ public class MessageEventHandler implements EventHandler {
     private final static int HEARTBEAT_ACK_TIMEOUT = 100 * 1000;
     private final Logger logger = LoggerFactory.getLogger(MessageEventHandler.class);
     private final DispatchMessageHandler dispatchMessageHandler = new DispatchMessageHandler();
-    private Timer timer = null;
 
     @Override
     public void handle(WsSessionContext context) {
@@ -49,11 +46,6 @@ public class MessageEventHandler implements EventHandler {
         }
     }
 
-    private void stopHeartbeatAckWaitingTimer() {
-        timer.cancel();
-        timer = null;
-    }
-
     private void startHeartbeatSendTask(int heartbeatInterval, WsSessionContext context) {
         scheduledExecutor.scheduleAtFixedRate(
                 () -> {
@@ -61,17 +53,5 @@ public class MessageEventHandler implements EventHandler {
                     context.sendMessage(WsMessage.heartbeat());
                 },
                 heartbeatInterval, heartbeatInterval, TimeUnit.MILLISECONDS);
-    }
-
-    private void startNewHeartbeatAckWaitingTimer() {
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                logger.warn("tomon server no response after " + HEARTBEAT_ACK_TIMEOUT +
-                        " ms.session will be closed");
-
-            }
-        }, HEARTBEAT_ACK_TIMEOUT);
     }
 }

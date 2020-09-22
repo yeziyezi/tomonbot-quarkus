@@ -261,7 +261,7 @@ public class Spider {
         return allMatches;
     }
 
-    public List<Operator> getOperatorsInPool(String url) {
+    private List<Operator> getOperatorsInPool(String url) {
         String html;
         try {
             html = HttpUtil.doGet(url).body();
