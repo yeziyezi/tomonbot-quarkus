@@ -56,7 +56,7 @@ public class DispatchMessageHandler {
                 if (matcher.find()) {
                     int poolNum = Integer.parseInt(matcher.group(1));
                     int drawTimes = Integer.parseInt(matcher.group(2));
-                    if (poolNum < 0 || poolNum > PoolContext.getPools().size() + 1) {
+                    if (poolNum < 0 || poolNum > PoolContext.getPools().size()) {
                         PushUtil.pushBaseMessage(channelId, "没有找到卡池" + poolNum + "哦");
                         return;
                     }
