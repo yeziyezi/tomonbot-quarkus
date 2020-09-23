@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -108,12 +109,14 @@ public class Spider {
         pool.setOpenTime(tdMatches.get(1));
 
         //取得卡池抽取时间的截止日期，如果已经结束则跳过
-        String poolCloseTime = tdMatches.get(1).split("~")[1].trim();
+        String[] openCloseTime = tdMatches.get(1).split("~");
+        String poolCloseTime = openCloseTime[1].trim();
         boolean poolClosed = LocalDateTime.parse(poolCloseTime, dateTimeFormatter)
                 .isBefore(LocalDateTime.now());
         if (poolClosed) {
             return null;
         }
+        LocalDate poolStarDate = LocalDate.parse(openCloseTime[0].trim(), dateTimeFormatter);
         //解析出池子的url和名称
         List<String> poolUrlAndName = getMatches(tdMatches.get(0),
                 "<a\\shref=\"(/w/[^\"]+)\"\\stitle=\"寻访模拟/([^\"]+)\">").get(0);
@@ -122,7 +125,7 @@ public class Spider {
         String sixStarUpText = tdMatches.get(2);
         String fiveAndFourStarUpText = tdMatches.get(3);
         //抓取卡池内干员列表
-        List<Operator> operators = getOperatorsInPool(baseUrl + poolUrlAndName.get(1));
+        List<Operator> operators = getOperatorsInPool(poolStarDate, baseUrl + poolUrlAndName.get(1));
         //取得每个星级下的up干员名称列表
         Map<Integer, List<String>> upOperatorNamesOfStar = getUpOperatorNamesOfStar(operators, sixStarUpText,
                 fiveAndFourStarUpText);
@@ -257,7 +260,7 @@ public class Spider {
         return allMatches;
     }
 
-    private List<Operator> getOperatorsInPool(String url) {
+    private List<Operator> getOperatorsInPool(LocalDate poolStarDate, String url) {
         String html;
         try {
             html = HttpUtil.doGet(url).body();
@@ -274,6 +277,9 @@ public class Spider {
         return Arrays.stream(csv.split("\n"))
                 .map(s -> s.split(","))
                 .filter(arr -> arr.length == 5)
+                //过滤掉还没有出现在卡池里的干员
+                .filter(arr -> !LocalDate.parse(arr[3], DateTimeFormatter.ofPattern("yyyyMMdd"))
+                        .isAfter(poolStarDate))
                 .map(arr -> Operator.of(arr[1], Integer.parseInt(arr[2]) + 1, 0))
                 .collect(Collectors.toList());
     }
