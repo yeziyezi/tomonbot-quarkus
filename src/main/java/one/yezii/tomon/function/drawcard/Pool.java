@@ -45,9 +45,10 @@ public class Pool {
             improveSixStarRate();
         }
         drawTimesWithoutSix++;
-        int star = RollHelper.roll(poolBaseRate.getMap());
+        int star = RollHelper.roll(poolCurrentRate.getMap());
         if (star == 6) {
             initPoolCurrentStarRate();
+            drawTimesWithoutSix = 0;
         }
         boolean isUp = rollIsUp(star);
         if (isUp) {
@@ -77,9 +78,6 @@ public class Pool {
                 .peek(entry -> entry.setValue(entry.getValue() * reductionRatio))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         poolCurrentRate.getMap().putAll(newStarRateMap);
-        System.out.println("current star rate:" + poolCurrentRate.getMap());
-        System.out.println("current star rate sum:" + poolCurrentRate.getMap().values().stream()
-                .mapToDouble(v -> v).sum());
     }
 
     private Operator rollOperatorFromCommonPool(int star) {
@@ -99,7 +97,7 @@ public class Pool {
 
     private boolean rollIsUp(int star) {
         double hitNum = upMap.get(star).stream().mapToDouble(Operator::getUpRate).sum();
-        return RollHelper.hit(hitNum, 100);
+        return RollHelper.hit(hitNum, 1.0);
     }
 
     public String getOpenTime() {
@@ -128,5 +126,11 @@ public class Pool {
 
     public Map<Integer, Set<Operator>> getUpMap() {
         return upMap;
+    }
+
+    public boolean isUp(Operator operator) {
+        return upMap.containsKey(operator.getStar())
+                && upMap.get(operator.getStar()).stream()
+                .anyMatch(op -> op.getName().equals(operator.getName()));
     }
 }

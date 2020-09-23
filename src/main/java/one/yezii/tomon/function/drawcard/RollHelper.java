@@ -33,6 +33,9 @@ public class RollHelper {
      * @return 是否命中
      */
     public static boolean hit(double hitNum, double totalNum) {
+        if (hitNum == totalNum) {
+            return true;
+        }
         return Dice.rollDouble(totalNum) < hitNum;
     }
 }
