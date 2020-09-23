@@ -47,7 +47,7 @@ public class DispatchMessageHandler {
                         PushUtil.pushBaseMessage(channelId, poolListMessage);
                         return;
                 }
-                Matcher matcher = Pattern.compile("(\\d)d(\\d{1,3})").matcher(messageContent);
+                Matcher matcher = Pattern.compile("(\\d)d(\\d{1,20})").matcher(messageContent);
                 if (matcher.find()) {
                     int poolNum = Integer.parseInt(matcher.group(1));
                     int drawTimes = Integer.parseInt(matcher.group(2));
@@ -64,7 +64,7 @@ public class DispatchMessageHandler {
                     for (int i = 0; i < drawTimes; i++) {
                         Operator operator = pool.draw();
                         sb.append(operator.getName());
-                        sb.append("※".repeat(Math.max(0, operator.getStar())));
+                        sb.append("★".repeat(Math.max(0, operator.getStar())));
                         sb.append("\n");
                     }
                     PushUtil.pushBaseMessage(channelId, sb.toString());
